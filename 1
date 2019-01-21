@@ -1,0 +1,29 @@
+Questionnaire coded
+
+name=input("What is your name?>>") # will keep your name in the program
+print("Hi, nice to meet you", (name))#this will print out the sentence with your data in it
+address=input("Where do you live?>>") #will keep your address in the program
+while True: # will keep repeating untill the user inputs the correct answer
+    gender = input("Are you male or female?>>")
+    if gender == "female" or gender == "Female" or gender == "FEMALE" or gender == "F": #this will set the answer for this question if they enter female or Female
+        print("You are female")
+        break 
+    elif gender == "male" or gender == "Male" or gender == "MALE" or gender == "M":
+        print("You are male")
+        break
+    else: #if the answer given by the user doesn't match the if and elif function then the program will ask the user to retake the question
+        print("Try again")
+        break 
+age=int(input("How old are you (in number) ?>>>")) #will keep your age in the program
+while True:
+    if age<50:
+        print("Nice! Keep on doing what you're doing")
+        break
+    elif age>50:
+        print("I'd start eating healthier and making sure I visit my doctor yearly if I were you!")
+        break
+ANR=input("What is your ANR number (6 numbers)?>>>")
+print("So, your ANR is", (ANR))
+opinion=input("How do you feel about the ZEZ being reinstated in 2008?>>")
+print("It's good to have your opinion")
+print("So your name is", (name),", your location is in",(address), ", your gender is", (gender), ", your age is", (age), "and your ANR is", (ANR), "it was really nice meeting you. Thanks for filling out the survey!")
