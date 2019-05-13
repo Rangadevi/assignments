@@ -117,7 +117,9 @@ cars %>%
 common_cyl %>%
   ggplot(aes(x = hwy_mpg)) +
   geom_histogram() +
-  facet_grid(ncyl ~ suv) +
+
+
+Infacet_grid(ncyl ~ suv) +
   ggtitle(" Facted on number of cilinder ans whether it is a suv or not")
   
  Here we're looking more at the central tendencies
@@ -188,3 +190,64 @@ gap_asia %>%
   filter(!is_outlier) %>%
   ggplot(aes(x = 1, y = lifeExp)) +
   geom_boxplot()
+In this last part wRe completing some case studies
+
+# Load packages
+library(ggplot2)
+library(dplyr)
+library(openintro)
+head(email)
+# Compute summary statistics
+email %>%
+  group_by(spam) %>%
+  summarize(median(num_char), IQR(num_char)) 
+
+# Create plot
+email %>%
+  mutate(log_num_char = log(num_char)) %>%
+  ggplot(aes(x = spam, y = log_num_char)) +
+  geom_boxplot()
+  
+  # Compute center and spread for exclaim_mess by spam
+email %>%
+group_by(spam)%>%
+summarize(median(exclaim_mess), IQR(exclaim_mess))
+
+
+
+# Create plot for spam and exclaim_mess
+email %>%
+mutate(log_exclaim = log(exclaim_mess+0.01)) %>%
+ggplot(aes(log_exclaim))+geom_histogram()+ facet_wrap(~spam)
+
+zero inflation strategies: 
+analyze the two groups separately. 
+a simpler approach is to collapse into two=level categorical variable
+Then we can pipe it into a bar chart, 
+
+# Create plot of proportion of spam by image
+table(email$image)
+email %>%
+  mutate(has_image = image>0) %>%
+  ggplot(aes(x = has_image, fill = spam)) +
+  geom_bar(position = "fill")
+  # Question 1
+glimpse(email)
+email %>%
+  filter(dollar >0) %>%
+  group_by(spam) %>%
+  summarize(median(dollar))
+
+# Question 2
+email %>%
+  filter(dollar >10) %>%
+  ggplot(aes(x = spam)) +
+  geom_bar()
+  
+  # Reorder levels
+email$number <- factor(email$number, levels = c("none", "small", "big"))
+
+# Construct plot of number
+ggplot(email, aes(x = number)) +
+  geom_bar() +
+  facet_wrap(~ spam)
