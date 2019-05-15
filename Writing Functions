@@ -1,0 +1,10 @@
+# Define ratio() function
+ratio <- function(x, y) {
+            x/y
+}
+
+# Call ratio() with arguments 3 and 4
+ratio(3,4)
+
+This following item shows the best practices. 
+mean(c(1:9, NA), trim = 0.1, na.rm=TRUE)
