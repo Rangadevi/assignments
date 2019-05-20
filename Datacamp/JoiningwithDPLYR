@@ -174,3 +174,143 @@ identical(definitive)
 # Check if same, rows in any order: definitive and union of complete and soundtrack
 complete_and_soundtrack %>%
 setequal(definitive)
+
+
+# Examine side_one and side_two
+side_one
+side_two
+
+# Bind side_one and side_two into a single dataset
+side_one %>% 
+bind_rows(side_two)
+
+# Examine hank_years and hank_charts
+hank_years
+hank_charts
+
+hank_years %>% 
+  # Reorder hank_years alphabetically by song title
+  arrange(song) %>% 
+  # Select just the year column
+  select(year) %>% 
+  # Bind the year column
+  bind_cols(hank_charts) %>% 
+  # Arrange the finished dataset
+  arrange(year)
+  
+ Building a better dataframe. 
+ data_frame()
+ as_data_frame()
+ will never change the data type of the vectors
+ will never add row names or change column names
+ recycle vectors greater than length 1. 
+ data_frame() doesn't do anything you don't want it to do
+ 
+ evaluates arghuments lazily in order. 
+ 
+ # Make combined data frame using data_frame()
+data_frame (year = hank_year,
+song = hank_song,
+peak = hank_peak)%>% 
+  # Extract songs where peak equals 1
+  filter(peak==1)
+  
+  # Examine the contents of hank
+hank
+
+# Convert the hank list into a data frame
+data_frame( year = hank$year,
+song = hank$song,
+peak = hank$peak) %>% 
+  # Extract songs where peak equals 1
+  filter(peak==1)
+  # Examine the contents of michael
+michael
+
+# Replace the first line so each album has its own rows
+bind_rows(michael, .id = "album") %>% 
+  group_by(album) %>% 
+  mutate(rank = min_rank(peak)) %>% 
+  filter(rank == 1) %>% 
+  select(-rank, -peak)
+  
+each column in the data frame must be a single class of data. R will need to decise. 
+ DPLYR tries to simply the process. 
+ Returns an error, expects you to manually coerce the data. Exceptions are factors. Then it will combine the data. 
+ 
+ seventies %>% 
+  # Coerce seventies$year into a useful numeric
+  mutate(year = as.numeric(as.character(year))) %>% 
+  # Bind the updated version of seventies to sixties
+  bind_rows(sixties) %>% 
+  arrange(year)
+  
+  Advanced joining:
+  we're tackling 
+  
+  # Load the tibble package
+library(tibble)
+
+stage_songs %>% 
+  # Add row names as a column named song
+  rownames_to_column(var = "song") %>% 
+  # Left join stage_writers to stage_songs
+  left_join(stage_writers)
+  
+  # Examine the result of joining singers to two_songs
+two_songs %>% inner_join(singers, by = "movie")
+
+# Remove NA's from key before joining
+two_songs %>% 
+  filter(!is.na(movie)) %>% 
+  inner_join(singers, by = "movie")
+  
+  movie_years %>% 
+  # Left join movie_studios to movie_years
+  left_join(movie_studios, by = "movie") %>% 
+  # Rename the columns: artist and studio
+  rename(artist = name.x, studio = name.y)
+  
+  # Identify the key column
+elvis_songs
+elvis_movies
+
+elvis_movies %>% 
+  # Left join elvis_songs to elvis_movies by this column
+  left_join(elvis_songs, by=c("name"="movie")) %>% 
+  # Rename columns
+  rename(movie = name, year = year, song = name.y)
+  
+  list(more_artists, more_bands, supergroups) %>% 
+  # Return rows of more_artists in all three datasets
+  reduce(semi_join, by = c("first", "last"))
+  
+  # Alter the code to perform the join with a dplyr function
+left_join(bands, artists, by = c("first", "last"), all.x = TRUE) %>%
+  arrange(band)
+  
+  reduce(lahmanNames, intersect)
+  
+  lahmanNames %>%  
+  # Bind the data frames in lahmanNames
+  bind_rows(.id = "dataframe") %>%
+  # Group the result by var
+  group_by(var) %>%
+  # Tally the number of appearances
+  tally() %>%
+  # Filter the data
+  filter(n > 1) %>% 
+  # Arrange the results
+  arrange(desc(n))
+  
+  lahmanNames %>%  
+  # Bind the data frames in lahmanNames
+  bind_rows(.id = "dataframe") %>%
+  # Group the result by var
+  group_by(var) %>%
+  # Tally the number of appearances
+  tally() %>%
+  # Filter the data
+  filter(n > 1) %>% 
+  # Arrange the results
+  arrange(desc(n))
