@@ -1,0 +1,261 @@
+# Apply your theme function (dont't forget to call it with parentheses!)
+ilo_plot <- ilo_plot +
+  theme_ilo()
+
+# Examine ilo_plot
+ilo_plot
+
+ilo_plot +
+  # Add another theme call
+  theme(
+    # Change the background fill and color
+    strip.background = element_rect(fill="gray60", color = "gray95"),
+    # Change the color of the text
+    strip.text = element_text(color="white")
+  )
+  
+  
+  # Create the dot plot
+ilo_data
+ggplot(ilo_data) + geom_path(aes(x=working_hours, y=country))
+
+
+ggplot(ilo_data) +
+  geom_path(aes(x = working_hours, y = country),
+  # Add an arrow to each path
+  arrow = arrow(length = unit(1.5, "mm"), type = "closed"))
+  --------------------------------------------------------------
+  ggplot(ilo_data) +
+  geom_path(aes(x = working_hours, y = country),
+            arrow = arrow(length = unit(1.5, "mm"), type = "closed")) +
+  # Add a geom_text() geometry
+  geom_text(
+          aes(x = working_hours,
+              y = country,
+              label = round(working_hours, 1))
+        )
+        
+        ------------------------------------------------------------
+ 
+ 
+ library(forcats)
+
+# Reorder country factor levels
+ilo_data <- ilo_data %>%
+  # Arrange data frame
+  arrange(country) %>%
+  # Reorder countries by working hours in 2006
+  mutate(country = fct_reorder(country,
+                               working_hours,
+                               last))
+
+# Plot again
+ggplot(ilo_data) +
+  geom_path(aes(x = working_hours, y = country),
+            arrow = arrow(length = unit(1.5, "mm"), type = "closed")) +
+    geom_text(
+          aes(x = working_hours,
+              y = country,
+              label = round(working_hours, 1))
+          )
+-----------------------------------------------------------------------------          
+          # Save plot into an object for reuse
+ilo_dot_plot <- ggplot(ilo_data) +
+  geom_path(aes(x = working_hours, y = country),
+            arrow = arrow(length = unit(1.5, "mm"), type = "closed")) +
+    # Specify the hjust aesthetic with a conditional value
+    geom_text(
+          aes(x = working_hours,
+              y = country,
+              label = round(working_hours, 1),
+              hjust = ifelse(year == "2006", 1.4, -0.4)
+            ),
+          # Change the appearance of the text
+          size = 3,
+          family = "Bookman",
+          color = "gray25"
+          )
+          
+# Reuse ilo_dot_plot
+ilo_dot_plot <- ilo_dot_plot +
+  # Add labels to the plot
+  labs(
+    x = "Working hours per week",
+    y = "Country",
+    title = "People work less in 2006 compared to 1996",
+    subtitle = "Working hours in European countries, development since 1996",
+    caption = "Data source: ILO, 2017"
+  ) +
+  # Apply your theme
+  theme_ilo() +
+  # Change the viewport
+  coord_cartesian(x = c(25, 41))
+  
+# View the plot
+ilo_dot_plot
+
+
+------------------------------------------------------
+# Compute temporary data set for optimal label placement
+median_working_hours <- ilo_data %>%
+  group_by(country) %>%
+  summarize(median_working_hours_per_country = median(working_hours)) %>%
+  ungroup()
+
+# Have a look at the structure of this data set
+str(median_working_hours)
+
+ilo_dot_plot +
+  # Add label for country
+  geom_text(data = median_working_hours,
+            aes(y = country,
+                x = median_working_hours_per_country,
+                label = country),
+            vjust = 2,
+            family = "Bookman",
+            color = "gray25") +
+  # Remove axes and grids
+  theme(
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    panel.grid = element_blank(),
+    # Also, let's reduce the font size of the subtitle
+    plot.subtitle = element_text(size = 9)
+  )
+--------------------------------------------------------
+---
+title: "The reduction in weekly working hours in Europe" 
+subtitle: "Looking at the development between 1996 and 2006"
+author: "Rangadevi Chakraborty"
+output: html_document
+---
+
+## Summary
+
+This is where you are going to quickly summarize what you did.
+
+## Preparations
+
+This is where you will load the necessary R packages.
+
+## Analysis
+
+### Data
+
+This is where you will load the data. 
+
+### Preprocessing
+
+This is where you will preprocess the data.
+
+### Results
+
+This is where you will plot the data.
+
+
+---
+title: "The reduction in weekly working hours in Europe" 
+subtitle: "Looking at the development between 1996 and 2006"
+author: "Insert your name here"
+output: html_document
+---
+
+## Summary 
+
+The **International Labour Organization** (ILO) has many [data sets](http://www.ilo.org/global/statistics-and-databases/lang--en/index.htm) on working conditions. For example, one can look at how weekly working hours have been decreasing in many countries of the world, while monetary compensation has risen. In this report, *the reduction in weekly working hours* in European countries is analysed, and a comparison between 1996 and 2006 is made. All analysed countries have seen a decrease in weekly working hours since 1996 – some more than others.
+
+## Preparations 
+
+This is where you will load the necessary R packages.
+
+## Analysis
+
+### Data
+
+This is where you will load the data. 
+
+### Preprocessing
+
+This is where you will preprocess the data.
+
+### Results
+
+This is where you will plot the data.
+
+
+
+The loaded data contains `r count(ilo_data)`  rows. 
+
+``{r, fig.height = 8, fig.width = 4.5, fig.align = "center"}
+# Compute temporary data set for optimal label placement
+median_working_hours <- ilo_data %>%
+  group_by(country) %>%
+  
+  
+  The results of another analysis are shown here, even though they cannot be reproduced with the data at hand.
+
+![The relationship between weekly working hours and hourly compensation.](http://s3.amazonaws.com/assets.datacamp.com/production/course_5807/datasets/relationship.png)
+
+As you can see, there's also an interesting relationship. The more people work, the less compensation they seem to receive. This is quite possibly related to other proxy variables like overall economic stability and performance of a country.
+
+
+ilo_dot_plot
+
+---
+title: "The reduction in weekly working hours in Europe" 
+subtitle: "Looking at the development between 1996 and 2006"
+author: "Insert your name here"
+output: 
+  html_document:
+    theme: cosmo
+    highlight: monochrome
+---
+
+
+output: 
+  html_document:
+    theme: cosmo
+    highlight: monochrome
+    toc: true
+    toc_float: false
+    toc_depth: 4
+    --------------------
+    output: 
+  html_document:
+    theme: cosmo
+    highlight: monochrome
+    toc: true
+    toc_float: false
+    toc_depth: 4
+    code_folding: hide
+    number_sections: true
+    
+    
+    <style>
+body, h1, h2, h3, h4 {
+    font-family: "Bookman", serif;
+}
+
+body {
+    color: #333333;
+}
+a, a:hover {
+    color: red;
+}
+pre {
+    font-size: 10px;
+}
+</style>
+
+----------------------------------
+output: 
+  html_document:
+    theme: cosmo
+    highlight: monochrome
+    toc: true
+    toc_float: false
+    toc_depth: 4
+    code_folding: hide
+    css: styles.css
+    
