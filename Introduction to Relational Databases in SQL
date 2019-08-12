@@ -1,0 +1,8 @@
+-- Rename the organization column to 
+alter table organizations
+rename column organization TO id;
+
+-- Make id a primary key
+ALTER TABLE organizations
+add constraint organization_pk primary KEY (id);
+
