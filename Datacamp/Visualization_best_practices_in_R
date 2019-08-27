@@ -86,3 +86,25 @@ disease_counts <- who_disease %>%
 ggplot(disease_counts, aes(x=region, y=total_cases, fill=disease)) +
 	# Add a column geometry with the proper position value.
 	geom_col(position = "fill")
+
+who_subset <- who_disease %>% 
+	filter(
+		countryCode %in% interestingCountries,
+		disease == 'measles',
+		year %in% c(1992, 2002) # Modify years to 1992 and 2002
+	) %>% 
+	mutate(year = paste0('cases_', year)) %>% 
+	spread(year, cases)
+ 
+# Reorder y axis and change the cases year to 1992
+ggplot(who_subset, aes(x = log10(cases_1992), y = reorder(country, cases_1992))) +
+	geom_point()
+	
+	who_subset %>% 
+	mutate(logFoldChange = log2(cases_2002/cases_1992)) %>% 
+	ggplot(aes(x = logFoldChange, y = reorder(country, logFoldChange))) +
+	geom_point() +
+	geom_vline(xintercept = 0) +
+	xlim(-6,6) +
+	# add facet_grid arranged in the column direction by region and free_y scales
+	facet_grid(region~., scale = 'free_y')
