@@ -1,0 +1,223 @@
+# Set seed
+set.seed(42)
+
+# Shuffle row indices: rows
+rows <- sample(nrow(diamonds))
+
+# Randomly order data
+shuffled_diamonds <- diamonds[rows, ]
+
+
+# Determine row to split on: split
+split <- round(nrow(diamonds)*.80)
+
+# Create train
+train <- diamonds[1:split, ]
+
+# Create test
+test <- diamonds[(split+1): nrow(diamonds),]
+
+# Fit lm model on train: model
+model <- lm(price ~ ., train)
+
+# Predict on test: p
+p <- predict(model, test)
+
+# Compute errors: error
+error <- p - test[["price"]]
+
+# Calculate RMSE
+sqrt(mean(error^2))
+
+# Fit lm model using 5-fold CV: model
+model <- train(
+  medv ~., 
+  Boston,
+  method = "lm",
+  trControl = trainControl(
+    method = "cv", 
+    number = 5,
+    verboseIter = TRUE
+  )
+)
+
+# Print model to console
+model
+-----------------------------------------------------------------------
+# Fit lm model using 5 x 5-fold CV: model
+model <- train(
+  medv ~ ., 
+  Boston,
+  method = "lm",
+  trControl = trainControl(
+    method = "repeatedcv", 
+    number = 5,
+    repeats = 5, 
+    verboseIter = TRUE
+  )
+)
+
+# Print model to console
+model
+---------------------------------------------------------------------
+# Predict on full Boston dataset
+predict(model, Boston)
+
+--------------------------------------------------------------------
+# Get the number of observations
+n_obs <- nrow(Sonar)
+
+# Shuffle row indices: permuted_rows
+permuted_rows <- sample(n_obs)
+
+# Randomly order data: Sonar
+Sonar_shuffled <- Sonar[permuted_rows, ]
+
+# Identify row to split on: split
+split <- round(n_obs * 0.6)
+
+# Create train
+train <- Sonar_shuffled[1:split, ]
+
+# Create test
+test <- Sonar_shuffled[(split + 1):n_obs, ]
+
+--------------------------------------------------------------------
+# Get the number of observations
+n_obs <- nrow(Sonar)
+
+# Shuffle row indices: permuted_rows
+permuted_rows <- sample(n_obs)
+
+# Randomly order data: Sonar
+Sonar_shuffled <- Sonar[permuted_rows, ]
+
+# Identify row to split on: split
+split <- round(n_obs * 0.6)
+
+# Create train
+train <- Sonar_shuffled[1:split, ]
+
+# Create test
+test <- Sonar_shuffled[(split + 1):n_obs, ]
+
+
+-----------------------------------------------------------------
+# If p exceeds threshold of 0.5, M else R: m_or_r
+m_or_r <- ifelse(p>0.5, "M", "R")
+
+# Convert to factor: p_class
+p_class <- factor(m_or_r, levels = levels(test[["Class"]]))
+
+# Create confusion matrix
+confusionMatrix(p_class, test[["Class"]])
+
+true positive: sensitivity
+true negative: specificity
+
+-------------------------------------------------------------------
+
+# If p exceeds threshold of 0.9, M else R: m_or_r
+m_or_r <- ifelse(p>0.9, "M", "R")
+
+# Convert to factor: p_class
+p_class <- factor(m_or_r, levels = levels(test[["Class"]]))
+
+# Create confusion matrix
+confusionMatrix(p_class, test[["Class"]])
+
+------------------------------------------------------------------
+# Predict on test: p
+p <- predict(model, test, type = "response")
+
+# Make ROC curve
+colAUC(p, test[["Class"]], plotROC = TRUE)
+
+AUC : area under the Curve. 
+- single number summary of model accuracy
+- summarizes performance across all thresholds
+- ranges from 0-1 (.5 = random guessing, 1 = model is always right)
+- Rule of Thumb: AUC can be thought of as a letter grade. (.9 = A)
+
+--------------------------------------------------
+# Create trainControl object: myControl
+myControl <- trainControl(
+  method = "cv",
+  number = 10,
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE, # IMPORTANT!
+  verboseIter = TRUE
+)
+
+
+----------------------------------------------------------
+# Train glm with custom trainControl: model
+model <- train(
+  Class ~ ., 
+  Sonar, 
+  method = "glm",
+  trControl = myControl
+)
+
+# Print model to console
+model
+---------------------------------------------
+Random Forests:
+- unlike linear models, they have hyperparameters,
+- Hyperparameters require manual specification
+- Can impact model fit and vary from dataset-to-dataset
+- Default values often OK, but occasionally need adjustment.
+- improve accuracy by fitting many trees
+- fit each on to a bootstrap sample of your data
+
+library(caret)
+library(mlbench)
+data(Sonar)
+set.seed(42)
+model <- train(class ~.,
+data = Sonar, 
+method = "ranger")
+
+--------------------------------
+# Fit random forest: model
+model <- train(
+  quality ~.,
+  tuneLength = 1,
+  data = wine, 
+  method = "ranger",
+  trControl = trainControl(
+    method = "cv", 
+    number = 5, 
+    verboseIter = TRUE
+  )
+)
+
+# Print model to console
+model
+----------------------
+Random forests require tuning:
+hyperparameters control how the model is fit
+Selected by hand before the model is fit
+Most important is mtry: number of randomly selected variables used at each split
+- lower value = more random
+
+
+------------------------------
+# Fit random forest: model
+model <- train(
+  quality ~.,
+  tuneLength = 3,
+  data = wine, 
+  method = "ranger",
+  trControl = trainControl(
+    method = "cv", 
+    number = 5, 
+    verboseIter = TRUE
+  )
+)
+
+# Print model to console
+model
+
+# Plot model
+plot(model)
