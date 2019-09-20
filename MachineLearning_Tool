@@ -221,3 +221,263 @@ model
 
 # Plot model
 plot(model)
+---------------------------------------
+# From previous step
+tuneGrid <- data.frame(
+  .mtry = c(2, 3, 7),
+  .splitrule = "variance",
+  .min.node.size = 5
+)
+
+# Fit random forest: model
+model <- train(
+  quality ~.,
+  tuneGrid = tuneGrid,
+  data = wine, 
+  method = "ranger",
+  trControl = trainControl(
+    method = "cv", 
+    number = 5, 
+    verboseIter = TRUE
+  )
+)
+
+# Print model to console
+model
+
+# Plot model
+plot(model)
+------------------------
+# Create custom trainControl: myControl
+myControl <- trainControl(
+  method = "cv", 
+  number = 10,
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE, # IMPORTANT!
+  verboseIter = TRUE
+)
+
+-------------------------------------
+# Fit glmnet model: model
+model <- train(
+  y~., 
+  overfit,
+  method = "glmnet",
+  trControl = myControl
+)
+
+# Print model to console
+plot(model)
+
+# Print maximum ROC statistic
+max(model[["results"]][["ROC"]])
+---------------------------------
+# Train glmnet with custom trainControl and tuning: model
+model <- train(
+  y ~ ., 
+  overfit,
+  tuneGrid = expand.grid(
+    alpha = 0:1,
+    lambda = seq(0.0001, 1, length = 20)
+  ),
+  method = "glmnet",
+  trControl = myControl
+)
+
+# Print model to console
+model
+
+# Print maximum ROC statistic
+max(model[["results"]][["ROC"]])
+
+-------------------
+Dealing with missing values.
+
+data(mtcars)
+set.seed(42)
+mtcars[sample(1:nrow(mtcars), 10), "hp"] <- NA
+
+Split target from predictors
+
+the easiest would be to: model <- train(X, Y, preProcess = "medianImpute")
+print(model)
+-------------------------------------
+
+# Apply median imputation: median_model
+median_model <- train(
+  x = breast_cancer_x, 
+  y = breast_cancer_y,
+  method = "glm",
+  trControl = myControl,
+  preProcess = "medianImpute"
+)
+
+# Print median_model to console
+median_model
+------------------- Dealing with missing values:
+- median imputation is fast, but ....
+- can produce incorrect results if data missing not at random. 
+- k-nearest neighbors (KNN) imputation (strategy)
+- imputes based on similar non-missing rows. 
+
+Pretend smaller cars don't report horsepower. 
+Median imputation would be incorrect in this case, it 
+assumes that small cars have medium-large horsepower. 
+
+KNN imputation is better. Uses cars with similar disp/cyl to impute. Yields a more accurate model.
+But is a bit slower. 
+-----------------------------
+# Apply KNN imputation: knn_model
+knn_model <- train(
+  x = breast_cancer_x, 
+  y = breast_cancer_y,
+  method = "glm",
+  trControl = myControl,
+  preProcess = "knnImpute"
+)
+
+# Print knn_model to console
+knn_model
+
+preprocessing cheat sheet:
+STart with median imputation
+try KNN imputation if data missing not at random
+for linear models...
+- center and scale
+- try PCA and spatial sign
+------------------------------------------------
+# Update model with standardization
+model <- train(
+  x = breast_cancer_x, 
+  y = breast_cancer_y,
+  method = "glm",
+  trControl = myControl,
+  preProcess = c("center","scale"))
+
+# Print updated model
+model
+
+--------------------------------------
+reproduce dataset from last vid:
+model <- train(X, Y, method = "glm", preProcess = c("medianImpute", "center", "scale", etc)
+
+"zv"removes constant columns, "nzv" removes nearly constant columns. 
+-----------------------------------------
+# Identify near zero variance predictors: remove_cols
+remove_cols <- nearZeroVar(bloodbrain_x, names = TRUE, 
+                           freqCut = 2, uniqueCut = 20)
+remove_cols
+# Get all column names from bloodbrain_x: all_cols
+all_cols <- names(bloodbrain_x)
+all_cols
+# Remove from data: bloodbrain_x_small
+bloodbrain_x_small <- bloodbrain_x[, setdiff(all_cols, remove_cols)]
+----------------------------------------------------
+# Fit model on reduced data: model
+model <- train(
+  x = bloodbrain_x_small, 
+  y = bloodbrain_y, 
+  method = "glm"
+)
+
+# Print model to console
+model
+----------------------------------------
+
+principle Components analysis
+- combines low-variance and correlated variables
+- single set of high-variance, perpendicular predictors (perfectly uncorrelated)
+- prevents collinearity
+
+
+-----------------------------------------
+
+model <- train(
+x = bloodbrain_x,
+y = bloodbrain_y, 
+method = "glm", 
+preProcess = "pca")
+
+model
+
+---------------------------------------------------
+Reusing a trainControl. 
+the data: customer churn at a telecom company.
+fit different models and choose the best
+models must use the same training/test splits
+create a shared trainControl object
+
+library(caret)
+library(c50)
+data(churn)
+set.seed(42)
+myFolds <- createFolds(churnTrain$churn..)
+
+---------------------------------------
+# Create custom indices: myFolds
+myFolds <- createFolds(churn_y, k = 5)
+
+# Create reusable trainControl object: myControl
+myControl <- trainControl(
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE, # IMPORTANT!
+  verboseIter = TRUE,
+  savePredictions = TRUE,
+  index = myFolds
+)
+--------------------------------
+glmnet review: linear model with built in variable selection, graeat baseline model, 
+advantages: fits quickly, ignores noisy variables, 
+provides interpretable coefficients. 
+
+--------------------------------------------------
+# Fit glmnet model: model_glmnet
+model_glmnet <- train(
+  x = churn_x, 
+  y = churn_y,
+  metric = "ROC",
+  method = "glmnet",
+  trControl = myControl
+)
+
+----------------------------------------------
+after glmnet random forest always the second to try. 
+slower, less interpretable, often more accurate than glmnet, easier to tune, require little preprocessing. 
+
+
+------------------------------------------------------
+# Fit random forest: model_rf
+model_rf <- train(
+  x = churn_x, 
+  y = churn_y,
+  metric = "ROC",
+  method = "ranger",
+  trControl = myControl
+)
+------------------------------------
+Comparing models:
+makes ure they were fit on the same data!
+select criteria: highest average AUC, lowest standard deviation in AUC. 
+resamples() function is our friend. 
+-----------------------------------------
+# Create model_list
+model_list <- list(item1 = model_glmnet, item2 = model_rf)
+
+# Pass model_list to resamples(): resamples
+resamples <- resamples(model_list)
+
+# Summarize the results
+summary(resamples)
+
+----------------------------------------
+# Create bwplot
+bwplot(resamples, metric = "ROC")
+----------------------------------------
+# Create xyplot
+xyplot(resamples, metric = "ROC")
+
+# Create ensemble model: stack
+stack <- caretStack(model_list, method = "glm")
+model_list
+# Look at summary
+summary(stack)
