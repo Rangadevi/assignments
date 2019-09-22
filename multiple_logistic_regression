@@ -1,0 +1,34 @@
+ggplot(data = mpg_manuals, aes(x = factor(year), y = hwy)) + geom_boxplot
+
+A parallel slopes model would look like
+
+lm(hw~ displ+factor(year), data = mpg)
+
+----------------------
+# Explore the data
+glimpse(mario_kart)
+
+# fit parallel slopes
+lm(totalPr ~ wheels + cond, data = mario_kart)
+
+-----------------------
+# Augment the model
+augmented_mod <- augment(mod)
+glimpse(augmented_mod)
+
+# scatterplot, with color
+data_space <- ggplot(augmented_mod, aes(x = wheels, y = totalPr, color = cond)) + 
+  geom_point()
+  
+# single call to geom_line()
+data_space + 
+  geom_line(aes(y = .fitted))
+  --------------------------------
+  # build model
+lm(formula = bwt ~ parity + age, data = babies)
+
+
+---------------------
+# build model
+names(babies)
+lm(formula = bwt ~ gestation + smoke, data = babies)
