@@ -32,3 +32,70 @@ lm(formula = bwt ~ parity + age, data = babies)
 # build model
 names(babies)
 lm(formula = bwt ~ gestation + smoke, data = babies)
+
+---------------------
+# R^2 and adjusted R^2
+summary(mod)
+
+# add random noise
+mario_kart_noisy <- mario_kart %>%
+mutate(noise = rnorm(nrow(mario_kart)))
+  
+# compute new model
+mod2 <- lm(totalPr ~ wheels + cond + noise, mario_kart_noisy)
+
+# new R^2 and adjusted R^2
+summary(mod2)
+---------------------------
+# return a vector
+predict(mod)
+
+# return a data frame
+augment(mod)
+
+------------------------
+# include interaction
+lm(totalPr ~ cond + duration+ cond:duration, mario_kart)
+---------------------
+# interaction plot
+ggplot(mario_kart, aes(y = totalPr, x = duration, color = cond)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+  --------------------------------
+  slr <- ggplot(mario_kart, aes(y = totalPr, x = duration)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = 0)
+
+# model with one slope
+lm(totalPr ~ duration, mario_kart)
+
+# plot with two slopes
+slr + aes(color = cond)
+-------------------------------------
+# Fit the model using duration and startPr
+names(mario_kart)
+lm(totalPr ~ duration + startPr, mario_kart)
+--------------------------------------
+# add predictions to grid
+price_hats <- augment(mod, newdata = grid)
+
+# tile the plane
+data_space + 
+  geom_tile(data = price_hats, aes(fill = .fitted), alpha = 0.5)
+  --------------------------------------
+  # draw the 3D scatterplot
+p <- plot_ly(data = mario_kart, z = ~totalPr, x = ~duration, y = ~startPr, opacity = 0.6) %>%
+  add_markers() 
+  
+# draw the plane
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~plane, showscale = FALSE)
+  ----------------------------------------
+  # draw the 3D scatterplot
+p <- plot_ly(data = mario_kart, z = ~totalPr, x = ~duration, y = ~startPr, opacity = 0.6) %>%
+  add_markers(color = ~ cond) 
+  
+# draw two planes
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~plane0, showscale = FALSE) %>%
+  add_surface(x = ~x, y = ~y, z = ~plane1, showscale = FALSE)
